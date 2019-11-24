@@ -2,10 +2,16 @@
 
 set -e
 
+# Write the password file
+echo "$VAULT_PASS" > ~/.vault_pass.txt
+mkdir ~/.ssh
+ansible-vault --vault-password-file ~/.vault_pass.txt view ansible/deploy/deploy.secret > ~/.ssh/id_rsa
+chmod 0600 ~/.ssh/id_rsa
+
 # Evaluate keyfile
 export KEYFILE=
 if [ ! -z "$INPUT_KEYFILE" ]
-then
+then 
   if [ ! -f "$INPUT_KEYFILE" ]
   then
     echo "\$INPUT_KEYFILE is set. It's no file but directly entered ssh key. Will write to file and use for host connections."
@@ -88,5 +94,5 @@ else
 fi
 
 echo "going to execute: "
-echo ansible-playbook ${INPUT_PLAYBOOKNAME} ${INVENTORY} ${EXTRAFILE} ${INPUT_EXTRAVARS} ${KEYFILE} ${VERBOSITY}
-ansible-playbook ${INPUT_PLAYBOOKNAME} ${INVENTORY} ${EXTRAFILE} ${INPUT_EXTRAVARS} ${KEYFILE} ${VERBOSITY}
+echo ansible-playbook ${INPUT_PLAYBOOKNAME} ${INVENTORY} ${EXTRAFILE} ${INPUT_EXTRAVARS} ${KEYFILE} ${VERBOSITY} --vault-password-file ~/.vault_pass.txt --key-file ~/.ssh/id_rsa
+ansible-playbook ${INPUT_PLAYBOOKNAME} ${INVENTORY} ${EXTRAFILE} ${INPUT_EXTRAVARS} ${KEYFILE} ${VERBOSITY} --vault-password-file ~/.vault_pass.txt --key-file ~/.ssh/id_rsa
